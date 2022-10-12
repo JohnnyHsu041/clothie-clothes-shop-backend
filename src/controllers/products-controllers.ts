@@ -11,6 +11,27 @@ interface ProductFactors {
     newIn: boolean;
 }
 
+export const getAllProducts: RequestHandler = async (req, res, next) => {
+    let products;
+
+    try {
+        products = await ProductSchema.find({}).exec();
+    } catch (err) {
+        return next(new HttpError("Failed to fetch product data", 500));
+    }
+
+    if (!products || products.length === 0) {
+        return next(new HttpError("No product found", 404));
+    }
+
+    products.map((product) => product.toObject({ getters: true }));
+
+    res.status(200).json({
+        message: "Fetched all products data.",
+        products,
+    });
+};
+
 export const createProduct: RequestHandler = async (req, res, next) => {
     const { name, price, images, size, type, newIn } =
         req.body as ProductFactors;
