@@ -8,6 +8,7 @@ const productSchema = new Schema(
         size: { type: String, required: true },
         type: { type: String, required: true },
         newIn: { type: Boolean, required: true },
+        featured: { type: Boolean, required: true },
     },
     { collection: "products" }
 );

@@ -1,3 +1,4 @@
+import path from "path";
 import * as dotenv from "dotenv";
 dotenv.config();
 
@@ -11,6 +12,8 @@ import HttpError from "./models/http-error";
 const app = express();
 
 app.use(bodyParser.json());
+
+app.use("/uploads/images", express.static(path.join("uploads", "images")));
 
 app.use((req: Request, res: Response, next: NextFunction) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
