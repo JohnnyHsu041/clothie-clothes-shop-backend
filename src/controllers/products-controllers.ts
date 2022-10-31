@@ -18,15 +18,15 @@ export const getAllProducts: RequestHandler = async (req, res, next) => {
     try {
         products = await ProductSchema.find({}).exec();
     } catch (err) {
-        return next(new HttpError("Failed to fetch product data", 500));
+        return next(new HttpError("商品資訊取得失敗，請再試一次", 500));
     }
 
     if (!products || products.length === 0) {
-        return next(new HttpError("No product found", 404));
+        return next(new HttpError("商品不存在", 404));
     }
 
     res.status(200).json({
-        message: "Fetched all products data.",
+        message: "取得所有商品資訊",
         products: products.map((product) =>
             product.toObject({ getters: true })
         ),
@@ -39,15 +39,15 @@ export const getNewInProducts: RequestHandler = async (req, res, next) => {
     try {
         products = await ProductSchema.find({ newIn: true }).exec();
     } catch (err) {
-        return next(new HttpError("Failed to fetch new-in product data", 500));
+        return next(new HttpError("商品資訊取得失敗，請再試一次", 500));
     }
 
     if (!products || products.length === 0) {
-        return next(new HttpError("No new-in product found", 404));
+        return next(new HttpError("商品不存在", 404));
     }
 
     res.status(200).json({
-        message: "Fetched all new-in products data.",
+        message: "取得最新商品資訊",
         products: products.map((product) =>
             product.toObject({ getters: true })
         ),
@@ -60,17 +60,15 @@ export const getFeaturedProducts: RequestHandler = async (req, res, next) => {
     try {
         products = await ProductSchema.find({ featured: true }).exec();
     } catch (err) {
-        return next(
-            new HttpError("Failed to fetch featured product data", 500)
-        );
+        return next(new HttpError("商品資訊取得失敗，請再試一次", 500));
     }
 
     if (!products || products.length === 0) {
-        return next(new HttpError("No featured product found", 404));
+        return next(new HttpError("商品不存在", 404));
     }
 
     res.status(200).json({
-        message: "Fetched all featured products data.",
+        message: "取得主打商品資訊",
         products: products.map((product) =>
             product.toObject({ getters: true })
         ),
@@ -83,15 +81,15 @@ export const getAllAccessories: RequestHandler = async (req, res, next) => {
     try {
         products = await ProductSchema.find({ type: "accs" }).exec();
     } catch (err) {
-        return next(new HttpError("Failed to fetch accessories data", 500));
+        return next(new HttpError("商品資訊取得失敗，請再試一次", 500));
     }
 
     if (!products || products.length === 0) {
-        return next(new HttpError("No accessory found", 404));
+        return next(new HttpError("商品不存在", 404));
     }
 
     res.status(200).json({
-        message: "Fetched all accessories data.",
+        message: "取得飾品資訊",
         products: products.map((product) =>
             product.toObject({ getters: true })
         ),
@@ -105,15 +103,15 @@ export const getProductById: RequestHandler = async (req, res, next) => {
     try {
         product = await ProductSchema.find({ _id: productId }).exec();
     } catch (err) {
-        return next(new HttpError("Failed to fetch product data by Id", 500));
+        return next(new HttpError("商品資訊取得失敗，請再試一次", 500));
     }
 
     if (!product || product.length === 0) {
-        return next(new HttpError("No product found", 404));
+        return next(new HttpError("商品不存在", 404));
     }
 
     res.status(200).json({
-        message: "Fetched the product data.",
+        message: "取得特定商品資訊",
         product: product.map((product) => product.toObject({ getters: true })),
     });
 };
@@ -135,11 +133,11 @@ export const createProduct: RequestHandler = async (req, res, next) => {
     try {
         await createdProduct.save();
     } catch (err) {
-        return next(new HttpError("Failed to create the product", 500));
+        return next(new HttpError("產品建立失敗", 500));
     }
 
     res.status(201).json({
-        message: "created the product.",
+        message: "產品建立成功",
         product: createdProduct.toObject({ getters: true }),
     });
 };
@@ -153,11 +151,11 @@ export const updateProduct: RequestHandler = async (req, res, next) => {
     try {
         product = await ProductSchema.findById(productId).exec();
     } catch (err) {
-        return next(new HttpError("Failed to fetch the product data.", 500));
+        return next(new HttpError("商品資訊取得失敗，請再試一次", 500));
     }
 
     if (!product) {
-        return next(new HttpError("Product does not exist.", 404));
+        return next(new HttpError("商品不存在", 404));
     }
 
     product.name = updatedName;
@@ -166,11 +164,11 @@ export const updateProduct: RequestHandler = async (req, res, next) => {
     try {
         await product.save();
     } catch (err) {
-        return next(new HttpError("Failed to update the product.", 500));
+        return next(new HttpError("更新失敗", 500));
     }
 
     res.status(200).json({
-        message: "Updated the product.",
+        message: "更新成功",
         product: product.toObject({ getters: true }),
     });
 };
@@ -182,20 +180,20 @@ export const deleteProduct: RequestHandler = async (req, res, next) => {
     try {
         product = await ProductSchema.findById(productId).exec();
     } catch (err) {
-        return next(new HttpError("Failed to fetch the product data.", 500));
+        return next(new HttpError("商品資訊取得失敗，請再試一次", 500));
     }
 
     if (!product) {
-        return next(new HttpError("Product does not exist.", 404));
+        return next(new HttpError("商品不存在", 404));
     }
 
     try {
         await product.remove();
     } catch (err) {
-        return next(new HttpError("Failed to delete the product.", 500));
+        return next(new HttpError("刪除失敗", 500));
     }
 
     res.status(200).json({
-        message: "Deleted the product.",
+        message: "刪除成功",
     });
 };

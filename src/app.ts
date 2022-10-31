@@ -7,6 +7,7 @@ import bodyParser from "body-parser";
 import Mongoose from "mongoose";
 
 import productsRoutes from "./routes/products-routes";
+import usersRoutes from "./routes/users-routes";
 import HttpError from "./models/http-error";
 
 const app = express();
@@ -27,6 +28,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use("/api/products", productsRoutes);
+
+app.use("/api/users", usersRoutes);
 
 app.use((req: Request, res: Response, next: NextFunction) => {
     return next(new HttpError("Could not find the route.", 404));
