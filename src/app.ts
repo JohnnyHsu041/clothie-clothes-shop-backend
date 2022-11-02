@@ -41,7 +41,7 @@ app.use((err: HttpError, req: Request, res: Response, next: NextFunction) => {
     }
 
     res.status(err.code || 500).json({
-        message: err.message || "An unknown error occurred.",
+        message: `${err.message} (${err.code})` || "An unknown error occurred.",
     });
 });
 

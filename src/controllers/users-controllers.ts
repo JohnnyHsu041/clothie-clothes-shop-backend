@@ -3,6 +3,7 @@ dotenv.config();
 
 import { RequestHandler } from "express";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 import HttpError from "../models/http-error";
 import UserSchema from "../models/user-schema";
@@ -18,7 +19,7 @@ export const signup: RequestHandler = async (req, res, next) => {
     }
 
     if (existingUser) {
-        return next(new HttpError("帳號已註冊，請登入帳號", 422));
+        return next(new HttpError("此電子郵件已註冊，請登入", 422));
     }
 
     let hashedPassword;
@@ -40,10 +41,21 @@ export const signup: RequestHandler = async (req, res, next) => {
         return next(new HttpError("伺服器錯誤，請再試一次", 500));
     }
 
+    let token;
+    try {
+        token = jwt.sign(
+            { userId: newUser.id, email: newUser.email },
+            process.env.TOKEN_PRIVATE_KEY as string,
+            { expiresIn: "2h" }
+        );
+    } catch (err: any) {
+        return next(new HttpError("token產生失敗", 500));
+    }
+
     res.status(201).json({
         message: "註冊成功",
         userId: newUser.id,
-        email: newUser.email,
+        token,
     });
 };
 
@@ -72,15 +84,33 @@ export const login: RequestHandler = async (req, res, next) => {
         return next(new HttpError("帳號或密碼錯誤，請再試一次", 401));
     }
 
+    let token;
+    try {
+        token = jwt.sign(
+            {
+                userId: existingUser.id,
+                email: existingUser.email,
+            },
+            process.env.TOKEN_PRIVATE_KEY as string,
+            { expiresIn: "2h" }
+        );
+    } catch (err: any) {
+        return next(new HttpError("token產生失敗", 500));
+    }
+
     res.status(200).json({
         message: "登入成功",
         userId: existingUser.id,
-        email: existingUser.email,
+        token,
     });
 };
 
 export const updatePassword: RequestHandler = async (req, res, next) => {
-    const { email, password, updatedPassword } = req.body;
+    const { email, oldPassword, updatedPassword } = req.body;
+
+    if (oldPassword === updatedPassword) {
+        return next(new HttpError("新密碼不可與舊密碼相同，請重新輸入", 422));
+    }
 
     let existingUser;
     try {
@@ -95,7 +125,10 @@ export const updatePassword: RequestHandler = async (req, res, next) => {
 
     let isValidPassword = false;
     try {
-        isValidPassword = await bcrypt.compare(password, existingUser.password);
+        isValidPassword = await bcrypt.compare(
+            oldPassword,
+            existingUser.password
+        );
     } catch (err) {
         return next(new HttpError("密碼比對發生錯誤，請再試一次", 500));
     }
@@ -121,5 +154,27 @@ export const updatePassword: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({
         message: "密碼更新成功，請重新登入",
+    });
+};
+
+export const getUserById: RequestHandler = async (req, res, next) => {
+    const { userId } = req.body;
+
+    let existingUser;
+    try {
+        existingUser = await UserSchema.findOne({ id: userId }, "email").exec();
+    } catch (err: any) {
+        return next(
+            new HttpError("取得電子郵件資訊時發生錯誤，請再試一次", 500)
+        );
+    }
+
+    if (!existingUser) {
+        return next(new HttpError("使用者不存在", 422));
+    }
+
+    res.status(200).json({
+        message: "電子郵件取得成功",
+        email: existingUser.email,
     });
 };
