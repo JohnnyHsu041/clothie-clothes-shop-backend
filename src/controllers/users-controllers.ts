@@ -162,7 +162,10 @@ export const getUserById: RequestHandler = async (req, res, next) => {
 
     let existingUser;
     try {
-        existingUser = await UserSchema.findOne({ id: userId }, "email").exec();
+        existingUser = await UserSchema.findOne(
+            { _id: userId },
+            "email"
+        ).exec();
     } catch (err: any) {
         return next(
             new HttpError("取得電子郵件資訊時發生錯誤，請再試一次", 500)

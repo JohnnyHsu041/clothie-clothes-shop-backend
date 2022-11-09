@@ -22,6 +22,10 @@ router.get("/accs", getAllAccessories);
 
 router.get("/:pid", getProductById);
 
+// The following routes should be auth verification first
+// Those routes are only valid for admin
+// router.use(adminAuthCheck);
+
 router.post("/", createProduct);
 
 router.patch("/:pid", updateProduct);

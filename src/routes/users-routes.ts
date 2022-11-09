@@ -13,6 +13,9 @@ router.post("/signup", signup);
 
 router.post("/login", login);
 
+// The following routes should be auth verification first
+// router.use(userAuthCheck);
+
 router.patch("/", updatePassword);
 
 router.post("/", getUserById);
