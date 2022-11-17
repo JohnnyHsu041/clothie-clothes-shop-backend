@@ -4,16 +4,16 @@ import {
     deleteOrder,
     getOrdersByUserId,
 } from "../controllers/orders-controllers";
+import authCheck from "../middlewares/auth-check";
 
 const router = Router();
 
-// The following routes should be auth verification first
-// router.use(userAuthCheck);
+router.use(authCheck);
 
 router.post("/", createOrder);
 
-router.get("/:uid", getOrdersByUserId);
+router.get("/", getOrdersByUserId);
 
-router.delete("/:id", deleteOrder);
+router.delete("/:oid", deleteOrder);
 
 export default router;

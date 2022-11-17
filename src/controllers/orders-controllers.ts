@@ -5,19 +5,20 @@ import OrderSchema from "../models/order-schema";
 import UserSchema from "../models/user-schema";
 
 export const createOrder: RequestHandler = async (req, res, next) => {
-    const orderId = new Date().getTime().toString();
     const { products, amount, orderInfo, totalAmount, buyer } = req.body;
 
     let user;
     try {
-        user = await UserSchema.find({ _id: buyer }).exec();
+        user = await UserSchema.findById(req.userData.userId).exec();
     } catch (err: any) {
         return next(new HttpError("使用者資料取得失敗", 500));
     }
 
-    if (!user) {
-        return next(new HttpError("使用者不存在，無法建立訂單", 422));
+    if (!user || buyer !== req.userData.userId) {
+        return next(new HttpError("無使用權限", 401));
     }
+
+    const orderId = new Date().getTime().toString();
 
     const newOrder = new OrderSchema({
         orderId,
@@ -31,7 +32,7 @@ export const createOrder: RequestHandler = async (req, res, next) => {
         products,
         amount,
         totalAmount,
-        buyer,
+        buyer: req.userData.userId,
     });
 
     try {
@@ -47,11 +48,20 @@ export const createOrder: RequestHandler = async (req, res, next) => {
 };
 
 export const getOrdersByUserId: RequestHandler = async (req, res, next) => {
-    const userId = req.params.uid;
+    let user;
+    try {
+        user = await UserSchema.findById(req.userData.userId).exec();
+    } catch (err: any) {
+        return next(new HttpError("使用者資訊取得失敗", 500));
+    }
+
+    if (!user) {
+        return next(new HttpError("無使用權限", 401));
+    }
 
     let orders;
     try {
-        orders = await OrderSchema.find({ buyer: userId }).exec();
+        orders = await OrderSchema.find({ buyer: req.userData.userId }).exec();
     } catch (err: any) {
         return next(new HttpError("訂單資訊取得失敗", 500));
     }
@@ -68,11 +78,22 @@ export const getOrdersByUserId: RequestHandler = async (req, res, next) => {
 };
 
 export const deleteOrder: RequestHandler = async (req, res, next) => {
-    const id = req.params.id;
+    let user;
+    try {
+        user = await UserSchema.findById(req.userData.userId).exec();
+    } catch (err: any) {
+        return next(new HttpError("使用者資訊取得失敗", 500));
+    }
+
+    if (!user) {
+        return next(new HttpError("無使用權限", 401));
+    }
+
+    const orderId = req.params.oid;
 
     let order;
     try {
-        order = await OrderSchema.findById(id).exec();
+        order = await OrderSchema.findById(orderId).exec();
     } catch (err: any) {
         return next(new HttpError("訂單資訊取得錯誤", 500));
     }
