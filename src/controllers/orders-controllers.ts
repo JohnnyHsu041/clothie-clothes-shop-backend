@@ -45,3 +45,48 @@ export const createOrder: RequestHandler = async (req, res, next) => {
         orderId,
     });
 };
+
+export const getOrdersByUserId: RequestHandler = async (req, res, next) => {
+    const userId = req.params.uid;
+
+    let orders;
+    try {
+        orders = await OrderSchema.find({ buyer: userId }).exec();
+    } catch (err: any) {
+        return next(new HttpError("訂單資訊取得失敗", 500));
+    }
+
+    if (!orders || orders.length === 0) {
+        return next(new HttpError("無下單記錄", 404));
+    }
+
+    res.status(200).json({
+        message: "取得訂單資訊",
+        orders: orders.map((order) => order.toObject({ getters: true })),
+    });
+};
+
+export const deleteOrder: RequestHandler = async (req, res, next) => {
+    const id = req.params.id;
+
+    let order;
+    try {
+        order = await OrderSchema.findById(id).exec();
+    } catch (err: any) {
+        return next(new HttpError("訂單資訊取得錯誤", 500));
+    }
+
+    if (!order) {
+        return next(new HttpError("無下單記錄", 404));
+    }
+
+    try {
+        await order.remove();
+    } catch (err: any) {
+        return next(new HttpError("訂單更新失敗", 500));
+    }
+
+    res.status(200).json({
+        message: "刪除成功",
+    });
+};

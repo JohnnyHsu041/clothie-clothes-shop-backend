@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { createOrder } from "../controllers/orders-controllers";
+import {
+    createOrder,
+    deleteOrder,
+    getOrdersByUserId,
+} from "../controllers/orders-controllers";
 
 const router = Router();
 
@@ -7,5 +11,9 @@ const router = Router();
 // router.use(userAuthCheck);
 
 router.post("/", createOrder);
+
+router.get("/:uid", getOrdersByUserId);
+
+router.delete("/:id", deleteOrder);
 
 export default router;
