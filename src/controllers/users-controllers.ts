@@ -123,6 +123,10 @@ export const updatePassword: RequestHandler = async (req, res, next) => {
         return next(new HttpError("使用者不存在", 422));
     }
 
+    if (req.userData.userId !== existingUser.id) {
+        return next(new HttpError("無使用權限", 401));
+    }
+
     let isValidPassword = false;
     try {
         isValidPassword = await bcrypt.compare(
@@ -158,7 +162,7 @@ export const updatePassword: RequestHandler = async (req, res, next) => {
 };
 
 export const getUserById: RequestHandler = async (req, res, next) => {
-    const { userId } = req.body;
+    const userId = req.params.uid;
 
     let existingUser;
     try {
@@ -174,6 +178,10 @@ export const getUserById: RequestHandler = async (req, res, next) => {
 
     if (!existingUser) {
         return next(new HttpError("使用者不存在", 422));
+    }
+
+    if (existingUser.id !== req.userData.userId) {
+        return next(new HttpError("無使用權限", 401));
     }
 
     res.status(200).json({

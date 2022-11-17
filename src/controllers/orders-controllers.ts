@@ -56,7 +56,8 @@ export const getOrdersByUserId: RequestHandler = async (req, res, next) => {
         return next(new HttpError("訂單資訊取得失敗", 500));
     }
 
-    if (!orders || orders.length === 0) {
+    if (!orders) {
+        // Error occurs only when getting order data fails
         return next(new HttpError("無下單記錄", 404));
     }
 

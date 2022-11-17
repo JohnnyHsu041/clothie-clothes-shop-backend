@@ -6,6 +6,7 @@ import {
     updatePassword,
     getUserById,
 } from "../controllers/users-controllers";
+import authCheck from "../middlewares/auth-check";
 
 const router = Router();
 
@@ -13,11 +14,10 @@ router.post("/signup", signup);
 
 router.post("/login", login);
 
-// The following routes should be auth verification first
-// router.use(userAuthCheck);
+router.use(authCheck);
 
 router.patch("/", updatePassword);
 
-router.post("/", getUserById);
+router.get("/:uid", getUserById);
 
 export default router;
