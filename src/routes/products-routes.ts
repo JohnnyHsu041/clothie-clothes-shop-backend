@@ -9,6 +9,7 @@ import {
     getProductById,
     updateProduct,
 } from "../controllers/products-controllers";
+import authCheck from "../middlewares/auth-check";
 
 const router = Router();
 
@@ -22,9 +23,7 @@ router.get("/accs", getAllAccessories);
 
 router.get("/:pid", getProductById);
 
-// The following routes should be auth verification first
-// Those routes are only valid for admin
-// router.use(adminAuthCheck);
+router.use(authCheck);
 
 router.post("/", createProduct);
 

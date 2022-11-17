@@ -1,6 +1,8 @@
 import { RequestHandler } from "express";
+
 import HttpError from "../models/http-error";
 import ProductSchema from "../models/product-schema";
+import UserSchema from "../models/user-schema";
 
 interface ProductFactors {
     name: string;
@@ -117,6 +119,17 @@ export const getProductById: RequestHandler = async (req, res, next) => {
 };
 
 export const createProduct: RequestHandler = async (req, res, next) => {
+    let existingUser;
+    try {
+        existingUser = await UserSchema.findById(req.userData.userId).exec();
+    } catch (err: any) {
+        return next(new HttpError("使用者資訊取得失敗", 500));
+    }
+
+    if (!existingUser || !existingUser.isAdmin) {
+        return next(new HttpError("無使用權限", 401));
+    }
+
     const { name, price, images, size, type, newIn, featured } =
         req.body as ProductFactors;
 
@@ -143,6 +156,17 @@ export const createProduct: RequestHandler = async (req, res, next) => {
 };
 
 export const updateProduct: RequestHandler = async (req, res, next) => {
+    let existingUser;
+    try {
+        existingUser = await UserSchema.findById(req.userData.userId).exec();
+    } catch (err: any) {
+        return next(new HttpError("使用者資訊取得失敗", 500));
+    }
+
+    if (!existingUser || !existingUser.isAdmin) {
+        return next(new HttpError("無使用權限", 401));
+    }
+
     const productId = req.params.pid;
 
     const { name: updatedName, price: updatedPrice } = req.body;
@@ -174,6 +198,17 @@ export const updateProduct: RequestHandler = async (req, res, next) => {
 };
 
 export const deleteProduct: RequestHandler = async (req, res, next) => {
+    let existingUser;
+    try {
+        existingUser = await UserSchema.findById(req.userData.userId).exec();
+    } catch (err: any) {
+        return next(new HttpError("使用者資訊取得失敗", 500));
+    }
+
+    if (!existingUser || !existingUser.isAdmin) {
+        return next(new HttpError("無使用權限", 401));
+    }
+
     const productId = req.params.pid;
 
     let product;
